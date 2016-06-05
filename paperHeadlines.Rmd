@@ -1,0 +1,139 @@
+---
+title: "Guardian Headlines"
+author: "pssguy"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: [ menu ]
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(gdeltr2)
+library(stringr)
+library(plotly)
+
+mediaChoices <- c("theguardian.com","wsj.com")
+
+data <- 
+  get_data_ft_api_domains(term = NA, domains = mediaChoices)
+
+data <- data %>% 
+  mutate(url.thumbnail=ifelse(is.na(url.thumbnail),"noImage2.jpg",url.thumbnail)) %>% 
+  arrange(desc(date_time))
+
+```
+
+Row {data-height=20}
+-----------------------------------------------------------------------
+```{r}
+h4("Latest Headlines from the Guardian, automatically repolled every 15 minutes. Click image for article")
+```
+
+Row {data-height=150}
+-----------------------------------------------------------------------
+
+
+### Chart A
+
+```{r}
+
+strong(h4(data$url.text[1]))
+a(href=data$url.article[1], img(src=data$url.thumbnail[1], width= 350))
+
+
+```
+
+
+
+### Chart B
+
+```{r}
+strong(h4(data$url.text[2]))
+a(href=data$url.article[2], img(src=data$url.thumbnail[2], width= 350))
+
+```
+
+### Chart C
+
+```{r}
+
+strong(h4(data$url.text[3]))
+a(href=data$url.article[3], img(src=data$url.thumbnail[3], width= 350))
+
+
+```
+
+### Chart D
+
+```{r}
+strong(h4(data$url.text[4]))
+a(href=data$url.article[4], img(src=data$url.thumbnail[4], width= 350))
+
+
+```
+
+### .
+
+```{r}
+strong(h4(data$url.text[5]))
+a(href=data$url.article[5], img(src=data$url.thumbnail[5], width= 350))
+
+
+```
+
+Row {data-height=150}
+-----------------------------------------------------------------------
+
+
+### 6
+
+```{r}
+
+strong(h4(data$url.text[6]))
+a(href=data$url.article[6], img(src=data$url.thumbnail[6], width= 350))
+
+
+```
+
+
+
+### 7
+
+```{r}
+strong(h4(data$url.text[7]))
+a(href=data$url.article[7], img(src=data$url.thumbnail[7], width= 350))
+
+
+```
+
+### 8
+
+```{r}
+
+strong(h4(data$url.text[8]))
+a(href=data$url.article[8], img(src=data$url.thumbnail[8], width= 350))
+
+
+```
+
+### 9
+
+```{r}
+strong(h4(data$url.text[9]))
+a(href=data$url.article[9], img(src=data$url.thumbnail[9], width= 350))
+
+
+```
+
+### 10
+
+```{r}
+strong(h4(data$url.text[10]))
+a(href=data$url.article[10], img(src=data$url.thumbnail[10], width= 350))
+
+
+```
