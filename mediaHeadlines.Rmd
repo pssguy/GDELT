@@ -1,0 +1,203 @@
+---
+title: "Guardian Headlines"
+author: "pssguy"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: [ menu ]
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(gdeltr2)
+library(stringr)
+library(plotly)
+
+mediaChoices <- c("theguardian.com","wsj.com")
+
+
+
+```
+
+Row {data-height=50}
+-----------------------------------------------------------------------
+```{r inc munging}
+h4("Latest Headlines from the Selected Media, automatically repolled every 15 minutes. Click image for article")
+
+selectInput("media", "Choose", choices=mediaChoices,multiple=T, selected="theguardian.com")
+
+info <- reactive({
+data <- 
+  get_data_ft_api_domains(term = NA, domains = input$media)
+
+data <- data %>% 
+  mutate(url.thumbnail=ifelse(is.na(url.thumbnail),"noImage2.jpg",url.thumbnail)) %>% 
+  arrange(desc(date_time))
+
+info=list(data=data)
+return(info)
+
+})
+```
+
+Row {data-height=250}
+-----------------------------------------------------------------------
+
+
+### .
+
+```{r}
+
+output$one <- renderUI({
+  list(
+h4(strong(info()$data$url.text[1])),
+  a(href=info()$data$url.article[1], img(src=info()$data$url.thumbnail[1], width= 350))
+  )
+})
+
+uiOutput("one")
+```
+
+
+### .
+
+```{r}
+
+output$two <- renderUI({
+  list(
+h4(strong(info()$data$url.text[2])),
+  a(href=info()$data$url.article[2], img(src=info()$data$url.thumbnail[2], width= 350))
+  )
+})
+
+uiOutput("two")
+```
+
+
+### .
+
+```{r}
+
+output$three <- renderUI({
+  list(
+h4(strong(info()$data$url.text[3])),
+  a(href=info()$data$url.article[3], img(src=info()$data$url.thumbnail[3], width= 350))
+  )
+})
+
+uiOutput("three")
+```
+
+
+### .
+
+```{r}
+
+output$four <- renderUI({
+  list(
+h4(strong(info()$data$url.text[4])),
+  a(href=info()$data$url.article[4], img(src=info()$data$url.thumbnail[4], width= 350))
+  )
+})
+
+uiOutput("four")
+```
+
+
+### .
+
+```{r}
+
+output$five <- renderUI({
+  list(
+h4(strong(info()$data$url.text[5])),
+  a(href=info()$data$url.article[5], img(src=info()$data$url.thumbnail[5], width= 350))
+  )
+})
+
+uiOutput("five")
+```
+
+
+
+Row {data-height=250}
+-----------------------------------------------------------------------
+
+
+### .
+
+```{r}
+
+output$six <- renderUI({
+  list(
+h4(strong(info()$data$url.text[6])),
+  a(href=info()$data$url.article[6], img(src=info()$data$url.thumbnail[6], width= 350))
+  )
+})
+
+uiOutput("six")
+```
+
+
+### .
+
+```{r}
+
+output$seven <- renderUI({
+  list(
+h4(strong(info()$data$url.text[7])),
+  a(href=info()$data$url.article[7], img(src=info()$data$url.thumbnail[7], width= 350))
+  )
+})
+
+uiOutput("seven")
+```
+
+
+### .
+
+```{r}
+
+output$eight <- renderUI({
+  list(
+h4(strong(info()$data$url.text[8])),
+  a(href=info()$data$url.article[8], img(src=info()$data$url.thumbnail[8], width= 350))
+  )
+})
+
+uiOutput("eight")
+```
+
+
+### .
+
+```{r}
+
+output$nine <- renderUI({
+  list(
+h4(strong(info()$data$url.text[9])),
+  a(href=info()$data$url.article[9], img(src=info()$data$url.thumbnail[9], width= 350))
+  )
+})
+
+uiOutput("nine")
+```
+
+
+### .
+
+```{r}
+
+output$ten <- renderUI({
+  list(
+h4(strong(info()$data$url.text[10])),
+  a(href=info()$data$url.article[10], img(src=info()$data$url.thumbnail[10], width= 350))
+  )
+})
+
+uiOutput("ten")
+```
+
