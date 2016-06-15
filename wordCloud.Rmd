@@ -1,0 +1,230 @@
+---
+title: "Word Cloud"
+author: "by myTinyShinys"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: [ menu ]
+    source_code: embed
+    css: styles.css
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(gdeltr2)
+
+#library(plotly)
+library(wordcloud)
+
+mediaChoices <- sort(c("theguardian.com","wsj.com","dailymail.co.uk","bbc.co.uk","espn.com","news.cn","thehindu.com", "orlandosentinel.com","washingtonpost.com", "nytimes.com", 'spiegel.de'))
+
+
+
+```
+
+Inputs {.sidebar data-width=325}
+-------------------------------------
+
+```{r inc munging}
+includeMarkdown("info.md")
+hr()
+
+h5("Most common words used in recent aerticles relating to chosen subject, by media source") 
+
+
+inputPanel(
+radioButtons("source", label="Method of Media Selection", choices=c("From List","Self Input"), inline=T)
+)
+
+output$method <- renderUI(
+  if(input$source=="From List"){
+  selectInput("media_list", "Choose Maximum 3 Sources. Click input for more choices", choices=mediaChoices,multiple=T, selected=c('washingtonpost.com'))
+  } else {
+    textInput("media_self",label="Enter url(s) of desired media, separated by comma. Max 3", 
+              placeholder="e.g. latimes.com, spiegel.de")
+  }
+)
+
+
+inputPanel(
+uiOutput("method")
+)
+ inputPanel(
+textInput("subject",label="Enter Subject of interest", 
+              placeholder="e.g. Orlando")
+)
+
+actionButton("go",label = "Get WordClouds", icon = NULL, width = '150px')
+ br()
+  em("NB. Sometimes sources are unavailable or retrieval time is not immediate. A larger screen will show
+     more words") 
+
+info <- eventReactive(input$go,{
+
+  if(input$source=="From List") {
+
+    
+  theDomains <- input$media_list
+  
+  } else {
+    
+   theDomains <-  str_trim(unlist(str_split(input$media_self,",")))
+  }
+  print(theDomains)
+  
+   stopwords <- c(input$subject,"mr","mrs")
+  
+domain_wordcloud <- 
+  get_data_wordcloud_ft_api_domains(domains = theDomains, term = input$subject, last_minutes = 60) %>% 
+  filter(!word %in% stopwords)
+
+(glimpse(domain_wordcloud))
+
+write.csv(domain_wordcloud,"problem.csv")
+
+ info=list(df=domain_wordcloud,source=theDomains)
+ return(info)
+
+})
+```
+
+Row {data-height=1}
+-----------------------------------------------------------------------
+### {.no-title}
+
+```{r}
+
+renderText(info()$source[1])
+
+``` 
+
+### {.no-title}
+
+```{r}
+
+renderText({
+  req(info()$source[2])
+  info()$source[2]
+  })
+
+```
+
+
+### {.no-title}
+
+```{r}
+
+renderText({
+  req(info()$source[3])
+  info()$source[3]
+  })
+
+```
+
+
+Row {data-height=200}
+-----------------------------------------------------------------------
+
+### {.no-title}
+
+
+```{r}
+
+renderPlot({
+
+  theDomain <- info()$source[1]
+   
+   
+  df <- info()$df %>%
+    filter(domain==theDomain)
+
+ 
+  write.csv(df,"wcproblem.csv")
+ 
+  
+   
+  wordcloud(df$word, # words
+          df$sizeWord, # frequencies
+          scale = c(4,1), # size of largest and smallest words
+          min.freq=10,
+          colors = brewer.pal(8,"Dark2"), # number of colors, palette
+          rot.per = 0.5) # proportion of words to rotate 90 degrees
+  
+  
+
+})
+
+#plotOutput("one")
+```
+
+
+### {.no-title}
+
+
+```{r}
+
+renderPlot({
+  
+  req(info()$source[2])
+ 
+  
+ 
+
+  theDomain <- info()$source[2]
+   
+   
+  df <- info()$df %>%
+    filter(domain==theDomain)
+
+  
+   
+  wordcloud(df$word, # words
+          df$sizeWord, # frequencies
+          scale = c(4,1), # size of largest and smallest words
+          min.freq=10,
+          colors = brewer.pal(8,"Dark2"), # number of colors, palette
+          rot.per = 0.5) # proportion of words to rotate 90 degrees
+  
+  
+
+})
+
+
+```
+
+
+
+### {.no-title}
+
+
+```{r}
+
+renderPlot({
+
+  req(info()$source[3]) 
+  theDomain <- info()$source[3]
+   
+   
+  df <- info()$df %>%
+    filter(domain==theDomain)
+
+  
+   
+  wordcloud(df$word, # words
+          df$sizeWord, # frequencies
+          scale = c(4,1), # size of largest and smallest words
+          min.freq=10,
+          colors = brewer.pal(8,"Dark2"), # number of colors, palette
+          rot.per = 0.5) # proportion of words to rotate 90 degrees
+  
+  
+
+})
+
+
+```
+
+
+

@@ -1,11 +1,12 @@
 ---
-title: "Guardian Headlines"
-author: "pssguy"
+title: "Media Headlines"
+author: "by myTinyShinys"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
     social: [ menu ]
     source_code: embed
+    css: styles.css
 runtime: shiny
 ---
 
@@ -13,29 +14,70 @@ runtime: shiny
 library(flexdashboard)
 
 library(gdeltr2)
-library(stringr)
+
 library(plotly)
 
-mediaChoices <- c("theguardian.com","wsj.com")
+mediaChoices <- sort(c("theguardian.com","wsj.com","dailymail.co.uk","bbc.co.uk","espn.com","news.cn","thehindu.com", "orlandosentinel.com","washingtonpost.com", "nytimes.com"))
 
 
 
 ```
 
-Row {data-height=50}
------------------------------------------------------------------------
+Inputs {.sidebar data-width=325}
+-------------------------------------
+
 ```{r inc munging}
-h4("Latest Headlines from the Selected Media, automatically repolled every 15 minutes. Click image for article")
+includeMarkdown("info.md")
+hr()
 
-selectInput("media", "Choose", choices=mediaChoices,multiple=T, selected="theguardian.com")
+h5("Latest Headlines from the Selected Media") 
+h5("Click image for Original Article") 
 
-info <- reactive({
+inputPanel(
+radioButtons("source", label="Method of Media Selection", choices=c("From List","Self Input"), inline=T)
+)
+
+output$method <- renderUI(
+  if(input$source=="From List"){
+  selectInput("media_list", "Choose Sources. Click input for more choices", choices=mediaChoices,multiple=T, selected=c("nytimes.com","washingtonpost.com"))
+  } else {
+    textInput("media_self",label="Enter url(s) of desired media, separated by comma", 
+              placeholder="e.g. latimes.com, spiegel.de")
+  }
+)
+
+ 
+
+
+uiOutput("method")
+actionButton("go",label = "Get Articles", icon = NULL, width = '100px')
+br()
+ em("NB. Sometimes sources are unavailable or old articles get provided") 
+
+info <- eventReactive(input$go,{
+
+  if(input$source=="From List") {
+
+    
+  theDomains <- input$media_list
+  
+  } else {
+    
+   theDomains <-  str_trim(unlist(str_split(input$media_self,",")))
+  }
+  print(theDomains)
 data <- 
-  get_data_ft_api_domains(term = NA, domains = input$media)
+  get_data_ft_api_domains(term = NA, domains = theDomains)
+
+
 
 data <- data %>% 
-  mutate(url.thumbnail=ifelse(is.na(url.thumbnail),"noImage2.jpg",url.thumbnail)) %>% 
-  arrange(desc(date_time))
+  mutate(urlThumbnail=ifelse(is.na(urlThumbnail),"http://www.premiersoccerstats.com/noImage2.jpg",urlThumbnail)) %>% 
+  arrange(desc(dateTimeArticle))
+
+
+
+
 
 info=list(data=data)
 return(info)
@@ -43,18 +85,19 @@ return(info)
 })
 ```
 
-Row {data-height=250}
+Row {data-height=200}
 -----------------------------------------------------------------------
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$one <- renderUI({
-  list(
-h4(strong(info()$data$url.text[1])),
-  a(href=info()$data$url.article[1], img(src=info()$data$url.thumbnail[1], width= 350))
+  
+   list(
+h4(strong(info()$data$titleArticle[1])),
+  a(href=info()$data$urlArticle[1], target='_blank', img(src=info()$data$urlThumbnail[1], width= 350))
   )
 })
 
@@ -62,14 +105,15 @@ uiOutput("one")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$two <- renderUI({
+ 
   list(
-h4(strong(info()$data$url.text[2])),
-  a(href=info()$data$url.article[2], img(src=info()$data$url.thumbnail[2], width= 350))
+h4(strong(info()$data$titleArticle[2])),
+  a(href=info()$data$urlArticle[2], target='_blank', img(src=info()$data$urlThumbnail[2], width= 350))
   )
 })
 
@@ -77,14 +121,15 @@ uiOutput("two")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$three <- renderUI({
+  
   list(
-h4(strong(info()$data$url.text[3])),
-  a(href=info()$data$url.article[3], img(src=info()$data$url.thumbnail[3], width= 350))
+h4(strong(info()$data$titleArticle[3])),
+  a(href=info()$data$urlArticle[3], target='_blank', img(src=info()$data$urlThumbnail[3], width= 350))
   )
 })
 
@@ -92,14 +137,14 @@ uiOutput("three")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$four <- renderUI({
   list(
-h4(strong(info()$data$url.text[4])),
-  a(href=info()$data$url.article[4], img(src=info()$data$url.thumbnail[4], width= 350))
+h4(strong(info()$data$titleArticle[4])),
+  a(href=info()$data$urlArticle[4],target='_blank', img(src=info()$data$urlThumbnail[4], width= 350))
   )
 })
 
@@ -107,14 +152,14 @@ uiOutput("four")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$five <- renderUI({
   list(
-h4(strong(info()$data$url.text[5])),
-  a(href=info()$data$url.article[5], img(src=info()$data$url.thumbnail[5], width= 350))
+h4(strong(info()$data$titleArticle[5])),
+  a(href=info()$data$urlArticle[5],target='_blank', img(src=info()$data$urlThumbnail[5], width= 350))
   )
 })
 
@@ -123,18 +168,18 @@ uiOutput("five")
 
 
 
-Row {data-height=250}
+Row {data-height=200}
 -----------------------------------------------------------------------
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$six <- renderUI({
   list(
-h4(strong(info()$data$url.text[6])),
-  a(href=info()$data$url.article[6], img(src=info()$data$url.thumbnail[6], width= 350))
+h4(strong(info()$data$titleArticle[6])),
+  a(href=info()$data$urlArticle[6],target='_blank', img(src=info()$data$urlThumbnail[6], width= 350))
   )
 })
 
@@ -142,14 +187,14 @@ uiOutput("six")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$seven <- renderUI({
   list(
-h4(strong(info()$data$url.text[7])),
-  a(href=info()$data$url.article[7], img(src=info()$data$url.thumbnail[7], width= 350))
+h4(strong(info()$data$titleArticle[7])),
+  a(href=info()$data$urlArticle[7],target='_blank', img(src=info()$data$urlThumbnail[7], width= 350))
   )
 })
 
@@ -157,14 +202,14 @@ uiOutput("seven")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$eight <- renderUI({
   list(
-h4(strong(info()$data$url.text[8])),
-  a(href=info()$data$url.article[8], img(src=info()$data$url.thumbnail[8], width= 350))
+h4(strong(info()$data$titleArticle[8])),
+  a(href=info()$data$urlArticle[8],target='_blank', img(src=info()$data$urlThumbnail[8], width= 350))
   )
 })
 
@@ -172,14 +217,14 @@ uiOutput("eight")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$nine <- renderUI({
   list(
-h4(strong(info()$data$url.text[9])),
-  a(href=info()$data$url.article[9], img(src=info()$data$url.thumbnail[9], width= 350))
+h4(strong(info()$data$titleArticle[9])),
+  a(href=info()$data$urlArticle[9],target='_blank', img(src=info()$data$urlThumbnail[9], width= 350))
   )
 })
 
@@ -187,17 +232,95 @@ uiOutput("nine")
 ```
 
 
-### .
+### {.no-title}
 
 ```{r}
 
 output$ten <- renderUI({
   list(
-h4(strong(info()$data$url.text[10])),
-  a(href=info()$data$url.article[10], img(src=info()$data$url.thumbnail[10], width= 350))
+h4(strong(info()$data$titleArticle[10])),
+  a(href=info()$data$urlArticle[10],target='_blank', img(src=info()$data$urlThumbnail[10], width= 350))
   )
 })
 
 uiOutput("ten")
+```
+
+Row {data-height=200}
+-----------------------------------------------------------------------
+
+
+### {.no-title}
+
+```{r}
+
+output$eleven <- renderUI({
+  list(
+h4(strong(info()$data$titleArticle[11])),
+  a(href=info()$data$urlArticle[11],target='_blank', img(src=info()$data$urlThumbnail[11], width= 350))
+  )
+})
+
+uiOutput("eleven")
+```
+
+
+### {.no-title}
+
+```{r}
+
+output$twelve <- renderUI({
+  list(
+h4(strong(info()$data$titleArticle[12])),
+  a(href=info()$data$urlArticle[12],target='_blank', img(src=info()$data$urlThumbnail[12], width= 350))
+  )
+})
+
+uiOutput("twelve")
+```
+
+
+### {.no-title}
+
+```{r}
+
+output$thirteen <- renderUI({
+  list(
+h4(strong(info()$data$titleArticle[13])),
+  a(href=info()$data$urlArticle[13],target='_blank', img(src=info()$data$urlThumbnail[13], width= 350))
+  )
+})
+
+uiOutput("thirteen")
+```
+
+
+### {.no-title}
+
+```{r}
+
+output$fourteen <- renderUI({
+  list(
+h4(strong(info()$data$titleArticle[14])),
+  a(href=info()$data$urlArticle[14],target='_blank', img(src=info()$data$urlThumbnail[14], width= 350))
+  )
+})
+
+uiOutput("fourteen")
+```
+
+
+### {.no-title}
+
+```{r}
+
+output$fifteen <- renderUI({
+  list(
+h4(strong(info()$data$titleArticle[15])),
+  a(href=info()$data$urlArticle[15],target='_blank', img(src=info()$data$urlThumbnail[15], width= 350))
+  )
+})
+
+uiOutput("fifteen")
 ```
 
